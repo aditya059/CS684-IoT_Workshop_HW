@@ -1,0 +1,2341 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>IoT HTTP Server API</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+    <script>
+        hljs.configure({
+            tabReplace: '    ',
+        });
+        hljs.initHighlightingOnLoad();
+    </script>
+    <style>body {
+    position: relative;
+}
+
+h1 {
+    margin-top: 5px;
+}
+
+h1, h2, h3, h4 {
+    color: #2b2b2b;
+}
+
+h2:after {
+    content: ' ';
+}
+
+h5 {
+    font-weight: bold;
+}
+
+h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
+    display: none;
+    position: absolute;
+    margin-left: 8px;
+}
+
+h1:hover a, h2:hover a, h3:hover a, h4:hover a, h5:hover a, h6:hover a {
+    color: #a5a5a5;
+    display: initial;
+}
+
+.nav.nav-tabs > li > a {
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+.tab-content {
+    padding-top: 8px;
+}
+
+.table {
+    margin-bottom: 8px;
+}
+
+pre {
+    border-radius: 0px;
+    border: none;
+}
+
+pre code {
+    margin: -9.5px;
+}
+
+.request {
+    margin-top: 12px;
+    margin-bottom: 24px;
+}
+
+.response-text-sample {
+    padding: 0px !important;
+}
+
+.response-text-sample pre {
+    margin-bottom: 0px;
+}
+
+
+#sidebar-wrapper {
+    z-index: 1000;
+    position: fixed;
+    left: 250px;
+    width: 250px;
+    height: 100%;
+    margin-left: -250px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #2b2b2b;
+    padding-top: 20px;
+}
+
+#sidebar-wrapper ul {
+    width: 250px;
+}
+
+#sidebar-wrapper ul li {
+    margin-right: 10px;
+}
+
+#sidebar-wrapper ul li a:hover {
+    background: inherit;
+    text-decoration: none;
+}
+
+#sidebar-wrapper ul li a {
+    display: block;
+    color: #ECF0F1;
+    padding: 6px 15px;
+}
+
+#sidebar-wrapper ul li ul {
+    padding-left: 25px;
+}
+
+#sidebar-wrapper ul li ul li a {
+    padding: 1px 0px;
+}
+
+#sidebar-wrapper ul li a:hover,
+#sidebar-wrapper ul li a:focus {
+    color: #e0c46c;
+    border-right: solid 1px #e0c46c;
+}
+
+#sidebar-wrapper ul li.active > a {
+    color: #e0c46c;
+    border-right: solid 3px #e0c46c;
+}
+
+#sidebar-wrapper ul li:not(.active) ul {
+    display: none;
+}
+
+#page-content-wrapper {
+    width: 100%;
+    position: absolute;
+    padding: 15px 15px 15px 250px;
+}
+</style>
+</head>
+<body data-spy="scroll" data-target=".scrollspy">
+<div id="sidebar-wrapper">
+    <div class="scrollspy">
+    <ul id="main-menu" data-spy="affix" class="nav">
+        <li>
+            <a href="#doc-general-notes">General notes</a>
+        </li>
+        
+        <li>
+            <a href="#doc-api-detail">API detail</a>
+        </li>
+        
+        <li>
+            <a href="#request-login">Login</a>
+        </li>
+        
+        <li>
+            <a href="#request-create-thing">Create Thing</a>
+        </li>
+        
+        <li>
+            <a href="#request-get-thing">Get Thing</a>
+        </li>
+        
+        <li>
+            <a href="#request-update-thing">Update Thing</a>
+        </li>
+        
+        <li>
+            <a href="#request-delete-thing">Delete Thing</a>
+        </li>
+        
+        <li>
+            <a href="#request-thing-fetch-telemetry">Thing Fetch Telemetry</a>
+        </li>
+        
+        <li>
+            <a href="#request-get-thing-token">Get Thing Token</a>
+        </li>
+        
+        <li>
+            <a href="#request-add-telemetry">Add Telemetry</a>
+        </li>
+        
+        <li>
+            <a href="#request-update-telemetry">Update Telemetry</a>
+        </li>
+        
+        <li>
+            <a href="#request-delete-telemetry">Delete Telemetry</a>
+        </li>
+        
+        <li>
+            <a href="#request-fetch-telemetry">Fetch Telemetry</a>
+        </li>
+        
+        <li>
+            <a href="#request-rpc-send-command">RPC Send Command</a>
+        </li>
+        
+        <li>
+            <a href="#request-rpc-receive">RPC Receive</a>
+        </li>
+        
+        
+    </ul>
+</div>
+
+</div>
+<div id="page-content-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1>IoT HTTP Server API</h1>
+
+                <h2 id="doc-general-notes">
+                    General notes
+                    <a href="#doc-general-notes"><i class="glyphicon glyphicon-link"></i></a>
+                </h2>
+
+                <h1>IoT Server API</h1>
+
+<p>ReST API for communicating with IoT HTTP Server.</p>
+
+<h2>Overview</h2>
+
+<p>As part of the assignment, participants have to implement the given API in Python using <strong>requests</strong> library. While all the resources are usable on anything that supports HTTP, the ones for updating telemetry and receiving RPC commands are to be used on <strong>internet connected things</strong> or <strong>physical devices</strong>.</p>
+
+<h2>Authentication</h2>
+
+<p>There are <strong>two authentication schemes</strong>, one for <strong>authenticating the user</strong> and another for <strong>authenticating the thing</strong> which would be typically your micro-controllers and micro-computers.</p>
+
+<p>The <strong>/login</strong> endpoint is used for authenticating the user. The returned authentication token should be sent in <strong>Authorization</strong> header as <strong>Bearer &lt;token&gt;</strong> for organization and management purposes such as creating and updating things, sending RPC commands.
+Unless otherwise specified, use this method for authentication of the resource.</p>
+
+<p>The <strong>/thing/:id/token</strong> endpoint is used for authenticating the device. The returned access token should be copied to the device and sent in <strong>Authorization</strong> header as <strong>Bearer &lt;token&gt;</strong>.</p>
+
+<h2>Error Codes</h2>
+
+<p><strong>2XX</strong> is returned for successful operation, with 200 returned most commonly. <strong>4XX</strong> is used for client errors such as <strong>401</strong> for unauthorized user, <strong>403</strong> for wrong login credentials or invalid access, <strong>422</strong> for validation errors, etc.</p>
+
+<h2>Rate limit</h2>
+
+<p>Maximum of 10 requests per second. Extra requests will result in <strong>503 service unavailable</strong>.</p>
+
+
+                
+
+                <h2 id="doc-api-detail">
+                    API detail
+                    <a href="#doc-api-detail"><i class="glyphicon glyphicon-link"></i></a>
+                </h2>
+
+                
+                
+                <div class="request">
+
+                    <h3 id="request-login">
+                        Login
+                        <a href="#request-login"><i class="glyphicon glyphicon-link"></i></a>
+                    </h3>
+
+                    <div><p>Resource for user login. The returned <strong>authToken</strong> should be sent in <strong>Authorization</strong> header as <strong>Bearer &lt;token&gt;</strong>.</p>
+</div>
+
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active"><a href="#request-login-example-curl" data-toggle="tab">Curl</a></li>
+                            <li role="presentation"><a href="#request-login-example-http" data-toggle="tab">HTTP</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="request-login-example-curl">
+                                <pre><code class="hljs curl">curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" -d '{
+    "username": "omkar@gmail.com",
+    "password": "abcd"
+}' "https://apihptu.e-yantra.org/api/login"</code></pre>
+                            </div>
+                            <div class="tab-pane" id="request-login-example-http">
+                                <pre><code class="hljs http">POST /api/login HTTP/1.1
+Host: apihptu.e-yantra.org
+Accept: application/json
+Content-Type: application/json
+
+{
+    "username": "omkar@gmail.com",
+    "password": "abcd"
+}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            
+                            <li role="presentation" class="active">
+                                <a href="#request-login-responses-6d5206e1-759f-4796-a125-9246f3219e6e" data-toggle="tab">
+                                    
+                                    Wrong Password
+                                    
+                                </a>
+                            </li>
+                            
+                            <li role="presentation">
+                                <a href="#request-login-responses-2abfba59-8e03-4c0e-9675-9797d475873b" data-toggle="tab">
+                                    
+                                    Login Successful
+                                    
+                                </a>
+                            </li>
+                            
+                        </ul>
+                        <div class="tab-content">
+                            
+                            <div class="tab-pane active" id="request-login-responses-6d5206e1-759f-4796-a125-9246f3219e6e">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>401 Unauthorized</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Fri, 11 Dec 2020 05:26:59 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>59</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>42</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                    
+                                    <tr><td class="response-text-sample" colspan="2">
+                                        <pre><code>{
+    "status_code": 401,
+    "error": "Unauthorized"
+}</code></pre>
+                                    </td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                            <div class="tab-pane" id="request-login-responses-2abfba59-8e03-4c0e-9675-9797d475873b">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Sun, 06 Dec 2020 13:32:25 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>59</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>270</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                    
+                                    <tr><td class="response-text-sample" colspan="2">
+                                        <pre><code>{
+    "authToken": "33|YafTjUulZgi4H1AguZbbA6Fc2tYZPJgNKiNEbipR"
+}</code></pre>
+                                    </td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+
+                    <hr>
+                </div>
+                
+                
+                <div class="request">
+
+                    <h3 id="request-create-thing">
+                        Create Thing
+                        <a href="#request-create-thing"><i class="glyphicon glyphicon-link"></i></a>
+                    </h3>
+
+                    <div><p>Create an internet connected <strong>thing</strong>. A thing can send data and act on <strong>RPC</strong> commands.</p>
+</div>
+
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active"><a href="#request-create-thing-example-curl" data-toggle="tab">Curl</a></li>
+                            <li role="presentation"><a href="#request-create-thing-example-http" data-toggle="tab">HTTP</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="request-create-thing-example-curl">
+                                <pre><code class="hljs curl">curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" -d '{
+    "name": "Trough Monitor",
+    "thingType": "Raspberry Pi",
+    "description": "Monitors temperature and moisture level of the tomato trough."
+}' "https://apihptu.e-yantra.org/api/thing"</code></pre>
+                            </div>
+                            <div class="tab-pane" id="request-create-thing-example-http">
+                                <pre><code class="hljs http">POST /api/thing HTTP/1.1
+Host: apihptu.e-yantra.org
+Accept: application/json
+Content-Type: application/json
+
+{
+    "name": "Trough Monitor",
+    "thingType": "Raspberry Pi",
+    "description": "Monitors temperature and moisture level of the tomato trough."
+}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            
+                            <li role="presentation" class="active">
+                                <a href="#request-create-thing-responses-cccf290b-b447-4bc2-ab43-c2b60153b633" data-toggle="tab">
+                                    
+                                    Successful
+                                    
+                                </a>
+                            </li>
+                            
+                            <li role="presentation">
+                                <a href="#request-create-thing-responses-81ba0340-5ae4-46e0-aa5b-2f3e931013b5" data-toggle="tab">
+                                    
+                                    Absent or Incorrect Auth Token
+                                    
+                                </a>
+                            </li>
+                            
+                            <li role="presentation">
+                                <a href="#request-create-thing-responses-4b704b80-3be1-472c-a273-1d807857c83a" data-toggle="tab">
+                                    
+                                    Only required fields
+                                    
+                                </a>
+                            </li>
+                            
+                        </ul>
+                        <div class="tab-content">
+                            
+                            <div class="tab-pane active" id="request-create-thing-responses-cccf290b-b447-4bc2-ab43-c2b60153b633">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Sun, 06 Dec 2020 13:37:19 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Authorization,Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>59</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>206</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                    
+                                    <tr><td class="response-text-sample" colspan="2">
+                                        <pre><code>{
+    "id": 32,
+    "name": "Trough Monitor",
+    "thingType": "Raspberry Pi",
+    "description": "Monitors temperature and moisture level of the tomato trough.",
+    "createdAt": "2020-12-06 19:07:19",
+    "updatedAt": "2020-12-06 19:07:19"
+}</code></pre>
+                                    </td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                            <div class="tab-pane" id="request-create-thing-responses-81ba0340-5ae4-46e0-aa5b-2f3e931013b5">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>401 Unauthorized</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Fri, 11 Dec 2020 05:27:38 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>30</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                    
+                                    <tr><td class="response-text-sample" colspan="2">
+                                        <pre><code>{
+    "message": "Unauthenticated."
+}</code></pre>
+                                    </td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                            <div class="tab-pane" id="request-create-thing-responses-4b704b80-3be1-472c-a273-1d807857c83a">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Sun, 06 Dec 2020 13:42:20 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Authorization,Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>58</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>146</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                    
+                                    <tr><td class="response-text-sample" colspan="2">
+                                        <pre><code>{
+    "id": 34,
+    "name": "Nasty Thing (To be deleted)",
+    "thingType": "",
+    "description": "",
+    "createdAt": "2020-12-06 19:12:20",
+    "updatedAt": "2020-12-06 19:12:20"
+}</code></pre>
+                                    </td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+
+                    <hr>
+                </div>
+                
+                
+                <div class="request">
+
+                    <h3 id="request-get-thing">
+                        Get Thing
+                        <a href="#request-get-thing"><i class="glyphicon glyphicon-link"></i></a>
+                    </h3>
+
+                    <div><p>Get details about the thing with id = <code>:id</code>.</p>
+</div>
+
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active"><a href="#request-get-thing-example-curl" data-toggle="tab">Curl</a></li>
+                            <li role="presentation"><a href="#request-get-thing-example-http" data-toggle="tab">HTTP</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="request-get-thing-example-curl">
+                                <pre><code class="hljs curl">curl -X GET -H "Accept: application/json" "https://apihptu.e-yantra.org/api/thing/:id"</code></pre>
+                            </div>
+                            <div class="tab-pane" id="request-get-thing-example-http">
+                                <pre><code class="hljs http">GET /api/thing/:id HTTP/1.1
+Host: apihptu.e-yantra.org
+Accept: application/json</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            
+                            <li role="presentation" class="active">
+                                <a href="#request-get-thing-responses-419cdb84-4f14-4197-81ed-6a8e09ea6abd" data-toggle="tab">
+                                    
+                                    No rights
+                                    
+                                </a>
+                            </li>
+                            
+                            <li role="presentation">
+                                <a href="#request-get-thing-responses-a4573607-4ece-4f84-803f-401dccc20646" data-toggle="tab">
+                                    
+                                    Successful
+                                    
+                                </a>
+                            </li>
+                            
+                        </ul>
+                        <div class="tab-content">
+                            
+                            <div class="tab-pane active" id="request-get-thing-responses-419cdb84-4f14-4197-81ed-6a8e09ea6abd">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>403 Forbidden</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Fri, 11 Dec 2020 05:29:54 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Authorization,Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>57</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>40</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                    
+                                    <tr><td class="response-text-sample" colspan="2">
+                                        <pre><code>{
+    "error": "You don't have permission..."
+}</code></pre>
+                                    </td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                            <div class="tab-pane" id="request-get-thing-responses-a4573607-4ece-4f84-803f-401dccc20646">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Sun, 06 Dec 2020 13:38:26 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Authorization,Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>58</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>206</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=99</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                    
+                                    <tr><td class="response-text-sample" colspan="2">
+                                        <pre><code>{
+    "id": 32,
+    "name": "Trough Monitor",
+    "thingType": "Raspberry Pi",
+    "description": "Monitors temperature and moisture level of the tomato trough.",
+    "createdAt": "2020-12-06 19:07:19",
+    "updatedAt": "2020-12-06 19:07:19"
+}
+</code></pre>
+                                    </td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+
+                    <hr>
+                </div>
+                
+                
+                <div class="request">
+
+                    <h3 id="request-update-thing">
+                        Update Thing
+                        <a href="#request-update-thing"><i class="glyphicon glyphicon-link"></i></a>
+                    </h3>
+
+                    <div><p>Update details about the thing with id = <code>:id</code>.</p>
+</div>
+
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active"><a href="#request-update-thing-example-curl" data-toggle="tab">Curl</a></li>
+                            <li role="presentation"><a href="#request-update-thing-example-http" data-toggle="tab">HTTP</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="request-update-thing-example-curl">
+                                <pre><code class="hljs curl">curl -X PUT -H "Accept: application/json" -H "Content-Type: application/json" -d '{
+    "name": "Trough Monitor v2",
+    "thingType": "Raspberry Pi - 3",
+    "description": "Monitors soil temperature and moisture levels of the tomato trough."
+}' "https://apihptu.e-yantra.org/api/thing/:id"</code></pre>
+                            </div>
+                            <div class="tab-pane" id="request-update-thing-example-http">
+                                <pre><code class="hljs http">PUT /api/thing/:id HTTP/1.1
+Host: apihptu.e-yantra.org
+Accept: application/json
+Content-Type: application/json
+
+{
+    "name": "Trough Monitor v2",
+    "thingType": "Raspberry Pi - 3",
+    "description": "Monitors soil temperature and moisture levels of the tomato trough."
+}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            
+                            <li role="presentation" class="active">
+                                <a href="#request-update-thing-responses-14f13f0e-7e8c-4a1e-8f85-4b1fd4b66d98" data-toggle="tab">
+                                    
+                                    No rights
+                                    
+                                </a>
+                            </li>
+                            
+                            <li role="presentation">
+                                <a href="#request-update-thing-responses-2cc5ecf1-7ab6-4b22-b77e-752c0375a5d2" data-toggle="tab">
+                                    
+                                    Successful
+                                    
+                                </a>
+                            </li>
+                            
+                        </ul>
+                        <div class="tab-content">
+                            
+                            <div class="tab-pane active" id="request-update-thing-responses-14f13f0e-7e8c-4a1e-8f85-4b1fd4b66d98">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>403 Forbidden</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Fri, 11 Dec 2020 06:37:32 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Authorization,Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>58</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>40</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                    
+                                    <tr><td class="response-text-sample" colspan="2">
+                                        <pre><code>{
+    "error": "You don't have permission..."
+}</code></pre>
+                                    </td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                            <div class="tab-pane" id="request-update-thing-responses-2cc5ecf1-7ab6-4b22-b77e-752c0375a5d2">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Sun, 06 Dec 2020 13:40:14 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Authorization,Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>59</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>219</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                    
+                                    <tr><td class="response-text-sample" colspan="2">
+                                        <pre><code>{
+    "id": 32,
+    "name": "Trough Monitor v2",
+    "thingType": "Raspberry Pi - 3",
+    "description": "Monitors soil temperature and moisture levels of the tomato trough.",
+    "createdAt": "2020-12-06 19:07:19",
+    "updatedAt": "2020-12-06 19:10:14"
+}</code></pre>
+                                    </td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+
+                    <hr>
+                </div>
+                
+                
+                <div class="request">
+
+                    <h3 id="request-delete-thing">
+                        Delete Thing
+                        <a href="#request-delete-thing"><i class="glyphicon glyphicon-link"></i></a>
+                    </h3>
+
+                    <div><p>Delete thing with id = <code>:id</code> and all it&rsquo;s related data such as telemetry and commands.</p>
+</div>
+
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active"><a href="#request-delete-thing-example-curl" data-toggle="tab">Curl</a></li>
+                            <li role="presentation"><a href="#request-delete-thing-example-http" data-toggle="tab">HTTP</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="request-delete-thing-example-curl">
+                                <pre><code class="hljs curl">curl -X DELETE "https://apihptu.e-yantra.org/api/thing/:id"</code></pre>
+                            </div>
+                            <div class="tab-pane" id="request-delete-thing-example-http">
+                                <pre><code class="hljs http">DELETE /api/thing/:id HTTP/1.1
+Host: apihptu.e-yantra.org</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            
+                            <li role="presentation" class="active">
+                                <a href="#request-delete-thing-responses-ae81cbbd-22e7-4770-bc75-164c32b3bdbd" data-toggle="tab">
+                                    
+                                    No rights
+                                    
+                                </a>
+                            </li>
+                            
+                            <li role="presentation">
+                                <a href="#request-delete-thing-responses-25c4b4ef-a1d8-4a00-ac92-dd2ce3e7c63f" data-toggle="tab">
+                                    
+                                    Successful
+                                    
+                                </a>
+                            </li>
+                            
+                        </ul>
+                        <div class="tab-content">
+                            
+                            <div class="tab-pane active" id="request-delete-thing-responses-ae81cbbd-22e7-4770-bc75-164c32b3bdbd">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>403 Forbidden</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Fri, 11 Dec 2020 06:38:10 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Authorization,Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>57</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>40</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                    
+                                    <tr><td class="response-text-sample" colspan="2">
+                                        <pre><code>{
+    "error": "You don't have permission..."
+}</code></pre>
+                                    </td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                            <div class="tab-pane" id="request-delete-thing-responses-25c4b4ef-a1d8-4a00-ac92-dd2ce3e7c63f">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Sun, 06 Dec 2020 13:43:00 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Authorization,Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>59</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>0</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>text/html; charset=UTF-8</td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+
+                    <hr>
+                </div>
+                
+                
+                <div class="request">
+
+                    <h3 id="request-thing-fetch-telemetry">
+                        Thing Fetch Telemetry
+                        <a href="#request-thing-fetch-telemetry"><i class="glyphicon glyphicon-link"></i></a>
+                    </h3>
+
+                    <div><p>Fetch telemetry data between start time <code>startTs</code> and end time <code>endTs</code> of thing with id = <code>:id</code>.</p>
+
+<p>The format for the date is <code>yyyy-mm-dd HH:mm:ss</code>, e.g. <code>2020-12-05 14:59:06</code>.</p>
+</div>
+
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active"><a href="#request-thing-fetch-telemetry-example-curl" data-toggle="tab">Curl</a></li>
+                            <li role="presentation"><a href="#request-thing-fetch-telemetry-example-http" data-toggle="tab">HTTP</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="request-thing-fetch-telemetry-example-curl">
+                                <pre><code class="hljs curl">curl -X GET -H "Accept: application/json" "https://apihptu.e-yantra.org/api/thing/:thingId/telemetry?startTs=2020-12-06 19:15:00&endTs=2020-12-06 19:45:00"</code></pre>
+                            </div>
+                            <div class="tab-pane" id="request-thing-fetch-telemetry-example-http">
+                                <pre><code class="hljs http">GET /api/thing/:thingId/telemetry?startTs=2020-12-06 19:15:00&endTs=2020-12-06 19:45:00 HTTP/1.1
+Host: apihptu.e-yantra.org
+Accept: application/json</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            
+                            <li role="presentation" class="active">
+                                <a href="#request-thing-fetch-telemetry-responses-42f902f7-001e-460a-a3e9-4d7150e80dc5" data-toggle="tab">
+                                    
+                                    Successful
+                                    
+                                </a>
+                            </li>
+                            
+                            <li role="presentation">
+                                <a href="#request-thing-fetch-telemetry-responses-c5ec52ed-8849-4630-9cd7-ca182a1c92fc" data-toggle="tab">
+                                    
+                                    No data in the time range
+                                    
+                                </a>
+                            </li>
+                            
+                        </ul>
+                        <div class="tab-content">
+                            
+                            <div class="tab-pane active" id="request-thing-fetch-telemetry-responses-42f902f7-001e-460a-a3e9-4d7150e80dc5">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Sun, 06 Dec 2020 13:57:14 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Authorization,Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>56</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>302</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                    
+                                    <tr><td class="response-text-sample" colspan="2">
+                                        <pre><code>[
+    {
+        "id": 12,
+        "data": {
+            "temperature": 18,
+            "moisture": 70
+        },
+        "createdAt": "2020-12-06 19:15:10",
+        "updatedAt": "2020-12-06 19:15:10"
+    },
+    {
+        "id": 13,
+        "data": {
+            "temperature": 17.86,
+            "moisture": 70.25,
+            "atmosphericTemperature": 25.43,
+            "atmosphericMoisture": 54.97
+        },
+        "createdAt": "2020-12-06 19:16:55",
+        "updatedAt": "2020-12-06 19:22:05"
+    }
+]</code></pre>
+                                    </td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                            <div class="tab-pane" id="request-thing-fetch-telemetry-responses-c5ec52ed-8849-4630-9cd7-ca182a1c92fc">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>404 Not Found</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Fri, 11 Dec 2020 07:38:22 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Authorization,Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>59</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>2</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                    
+                                    <tr><td class="response-text-sample" colspan="2">
+                                        <pre><code>[]</code></pre>
+                                    </td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+
+                    <hr>
+                </div>
+                
+                
+                <div class="request">
+
+                    <h3 id="request-get-thing-token">
+                        Get Thing Token
+                        <a href="#request-get-thing-token"><i class="glyphicon glyphicon-link"></i></a>
+                    </h3>
+
+                    <div><p>Get <strong>accessToken</strong> for thing with id = <code>:id</code>. This token is for use on physical device expected to send telemetry and receive RPC commands.</p>
+</div>
+
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active"><a href="#request-get-thing-token-example-curl" data-toggle="tab">Curl</a></li>
+                            <li role="presentation"><a href="#request-get-thing-token-example-http" data-toggle="tab">HTTP</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="request-get-thing-token-example-curl">
+                                <pre><code class="hljs curl">curl -X GET -H "Accept: application/json" "https://apihptu.e-yantra.org/api/thing/:id/token"</code></pre>
+                            </div>
+                            <div class="tab-pane" id="request-get-thing-token-example-http">
+                                <pre><code class="hljs http">GET /api/thing/:id/token HTTP/1.1
+Host: apihptu.e-yantra.org
+Accept: application/json</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            
+                            <li role="presentation" class="active">
+                                <a href="#request-get-thing-token-responses-4fedce72-f42c-4215-8a07-ff97ff68db64" data-toggle="tab">
+                                    
+                                    Successful
+                                    
+                                </a>
+                            </li>
+                            
+                            <li role="presentation">
+                                <a href="#request-get-thing-token-responses-f254bf44-885b-40f8-a78b-0ec95fcc7a4a" data-toggle="tab">
+                                    
+                                    No rights
+                                    
+                                </a>
+                            </li>
+                            
+                        </ul>
+                        <div class="tab-content">
+                            
+                            <div class="tab-pane active" id="request-get-thing-token-responses-4fedce72-f42c-4215-8a07-ff97ff68db64">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Sun, 06 Dec 2020 13:43:52 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Authorization,Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>58</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>50</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                    
+                                    <tr><td class="response-text-sample" colspan="2">
+                                        <pre><code>{
+    "accessToken": "109d0ac67d9a4a8c84579a6e2ebf3ad3"
+}</code></pre>
+                                    </td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                            <div class="tab-pane" id="request-get-thing-token-responses-f254bf44-885b-40f8-a78b-0ec95fcc7a4a">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>403 Forbidden</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Fri, 11 Dec 2020 08:43:01 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Authorization,Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>59</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>40</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                    
+                                    <tr><td class="response-text-sample" colspan="2">
+                                        <pre><code>{
+    "error": "You don't have permission..."
+}</code></pre>
+                                    </td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+
+                    <hr>
+                </div>
+                
+                
+                <div class="request">
+
+                    <h3 id="request-add-telemetry">
+                        Add Telemetry
+                        <a href="#request-add-telemetry"><i class="glyphicon glyphicon-link"></i></a>
+                    </h3>
+
+                    <div><p>Send telemetry from the internet connected thing. The thing is identified by the <strong>accessToken</strong> sent in the <strong>Authorization</strong> header as <strong>Bearer &lt;accessToken&gt;</strong>. The body can be a valid json.</p>
+</div>
+
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active"><a href="#request-add-telemetry-example-curl" data-toggle="tab">Curl</a></li>
+                            <li role="presentation"><a href="#request-add-telemetry-example-http" data-toggle="tab">HTTP</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="request-add-telemetry-example-curl">
+                                <pre><code class="hljs curl">curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" -d '{
+    "temperature": 19,
+    "moisture": 68,
+    "atmosphericTemperature": 24,
+    "atmosphericMoisture": 55
+}' "https://apihptu.e-yantra.org/api/telemetry"</code></pre>
+                            </div>
+                            <div class="tab-pane" id="request-add-telemetry-example-http">
+                                <pre><code class="hljs http">POST /api/telemetry HTTP/1.1
+Host: apihptu.e-yantra.org
+Accept: application/json
+Content-Type: application/json
+
+{
+    "temperature": 19,
+    "moisture": 68,
+    "atmosphericTemperature": 24,
+    "atmosphericMoisture": 55
+}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            
+                            <li role="presentation" class="active">
+                                <a href="#request-add-telemetry-responses-1bf9a845-d195-4386-92ea-749635befd94" data-toggle="tab">
+                                    
+                                    Add Telemetry - 1
+                                    
+                                </a>
+                            </li>
+                            
+                            <li role="presentation">
+                                <a href="#request-add-telemetry-responses-fce0084c-2781-4dde-a805-7e5d8f434d2f" data-toggle="tab">
+                                    
+                                    Add Telemetry - 3
+                                    
+                                </a>
+                            </li>
+                            
+                            <li role="presentation">
+                                <a href="#request-add-telemetry-responses-4087e76c-e1d3-464c-a94f-c60d5d167328" data-toggle="tab">
+                                    
+                                    Add Telemetry - 2
+                                    
+                                </a>
+                            </li>
+                            
+                        </ul>
+                        <div class="tab-content">
+                            
+                            <div class="tab-pane active" id="request-add-telemetry-responses-1bf9a845-d195-4386-92ea-749635befd94">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Sun, 06 Dec 2020 13:45:10 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Authorization,Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>59</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>117</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                    
+                                    <tr><td class="response-text-sample" colspan="2">
+                                        <pre><code>{
+    "id": 12,
+    "data": {
+        "temperature": 18,
+        "moisture": 70
+    },
+    "createdAt": "2020-12-06 19:15:10",
+    "updatedAt": "2020-12-06 19:15:10"
+}</code></pre>
+                                    </td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                            <div class="tab-pane" id="request-add-telemetry-responses-fce0084c-2781-4dde-a805-7e5d8f434d2f">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Sun, 06 Dec 2020 13:47:26 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Authorization,Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>58</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>170</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                    
+                                    <tr><td class="response-text-sample" colspan="2">
+                                        <pre><code>{
+    "id": 14,
+    "data": {
+        "temperature": 19,
+        "moisture": 68,
+        "atmosphericTemperature": 24,
+        "atmosphericMoisture": 55
+    },
+    "createdAt": "2020-12-06 19:17:26",
+    "updatedAt": "2020-12-06 19:17:26"
+}</code></pre>
+                                    </td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                            <div class="tab-pane" id="request-add-telemetry-responses-4087e76c-e1d3-464c-a94f-c60d5d167328">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Sun, 06 Dec 2020 13:46:55 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Authorization,Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>59</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>170</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                    
+                                    <tr><td class="response-text-sample" colspan="2">
+                                        <pre><code>{
+    "id": 13,
+    "data": {
+        "temperature": 18,
+        "moisture": 70,
+        "atmosphericTemperature": 25,
+        "atmosphericMoisture": 55
+    },
+    "createdAt": "2020-12-06 19:16:55",
+    "updatedAt": "2020-12-06 19:16:55"
+}</code></pre>
+                                    </td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+
+                    <hr>
+                </div>
+                
+                
+                <div class="request">
+
+                    <h3 id="request-update-telemetry">
+                        Update Telemetry
+                        <a href="#request-update-telemetry"><i class="glyphicon glyphicon-link"></i></a>
+                    </h3>
+
+                    <div><p>Update telemetry data point with dataId = <code>:dataId</code> for the internet connected thing. The thing for which to update the data is identified by the accessToken sent in the <strong>Authorization</strong> header as <strong>Bearer &lt;accessToken&gt;</strong>. The body can be a valid json.</p>
+</div>
+
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active"><a href="#request-update-telemetry-example-curl" data-toggle="tab">Curl</a></li>
+                            <li role="presentation"><a href="#request-update-telemetry-example-http" data-toggle="tab">HTTP</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="request-update-telemetry-example-curl">
+                                <pre><code class="hljs curl">curl -X PUT -H "Accept: application/json" -H "Content-Type: application/json" -d '{
+    "temperature": 17.86,
+    "moisture": 70.25,
+    "atmosphericTemperature": 25.43,
+    "atmosphericMoisture": 54.97
+}' "https://apihptu.e-yantra.org/api/telemetry/:dataId"</code></pre>
+                            </div>
+                            <div class="tab-pane" id="request-update-telemetry-example-http">
+                                <pre><code class="hljs http">PUT /api/telemetry/:dataId HTTP/1.1
+Host: apihptu.e-yantra.org
+Accept: application/json
+Content-Type: application/json
+
+{
+    "temperature": 17.86,
+    "moisture": 70.25,
+    "atmosphericTemperature": 25.43,
+    "atmosphericMoisture": 54.97
+}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            
+                            <li role="presentation" class="active">
+                                <a href="#request-update-telemetry-responses-8d589692-046a-42ac-8d4e-f1bf5a3f807a" data-toggle="tab">
+                                    
+                                    Response
+                                    
+                                </a>
+                            </li>
+                            
+                        </ul>
+                        <div class="tab-content">
+                            
+                            <div class="tab-pane active" id="request-update-telemetry-responses-8d589692-046a-42ac-8d4e-f1bf5a3f807a">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Sun, 06 Dec 2020 13:52:05 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Authorization,Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>59</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>182</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                    
+                                    <tr><td class="response-text-sample" colspan="2">
+                                        <pre><code>{
+    "id": 13,
+    "data": {
+        "temperature": 17.86,
+        "moisture": 70.25,
+        "atmosphericTemperature": 25.43,
+        "atmosphericMoisture": 54.97
+    },
+    "createdAt": "2020-12-06 19:16:55",
+    "updatedAt": "2020-12-06 19:22:05"
+}</code></pre>
+                                    </td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+
+                    <hr>
+                </div>
+                
+                
+                <div class="request">
+
+                    <h3 id="request-delete-telemetry">
+                        Delete Telemetry
+                        <a href="#request-delete-telemetry"><i class="glyphicon glyphicon-link"></i></a>
+                    </h3>
+
+                    <div><p>Delete telemetry data point with dataId = <code>:dataId</code> for the internet connected thing.
+The thing for which to delete the data is identified by the accessToken sent in the <strong>Authorization</strong> header as <strong>Bearer &lt;accessToken&gt;</strong>.</p>
+</div>
+
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active"><a href="#request-delete-telemetry-example-curl" data-toggle="tab">Curl</a></li>
+                            <li role="presentation"><a href="#request-delete-telemetry-example-http" data-toggle="tab">HTTP</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="request-delete-telemetry-example-curl">
+                                <pre><code class="hljs curl">curl -X DELETE -H "Accept: application/json" "https://apihptu.e-yantra.org/api/telemetry/:dataId"</code></pre>
+                            </div>
+                            <div class="tab-pane" id="request-delete-telemetry-example-http">
+                                <pre><code class="hljs http">DELETE /api/telemetry/:dataId HTTP/1.1
+Host: apihptu.e-yantra.org
+Accept: application/json</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            
+                            <li role="presentation" class="active">
+                                <a href="#request-delete-telemetry-responses-7f50d113-f724-4d0a-b152-56070ba3d5bf" data-toggle="tab">
+                                    
+                                    Response
+                                    
+                                </a>
+                            </li>
+                            
+                        </ul>
+                        <div class="tab-content">
+                            
+                            <div class="tab-pane active" id="request-delete-telemetry-responses-7f50d113-f724-4d0a-b152-56070ba3d5bf">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Sun, 06 Dec 2020 13:53:13 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Authorization,Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>59</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>170</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+
+                    <hr>
+                </div>
+                
+                
+                <div class="request">
+
+                    <h3 id="request-fetch-telemetry">
+                        Fetch Telemetry
+                        <a href="#request-fetch-telemetry"><i class="glyphicon glyphicon-link"></i></a>
+                    </h3>
+
+                    <div><p>Fetch telemetry data between start time <code>startTs</code> and end time <code>endTs</code>. The thing for which to fetch the data is identified by the accessToken sent in the <strong>Authorization</strong> header as <strong>Bearer &lt;accessToken&gt;</strong>.</p>
+
+<p>The format for the date is yyyy-mm-dd HH:mm:ss, e.g. 2020-12-05 14:59:06.</p>
+</div>
+
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active"><a href="#request-fetch-telemetry-example-curl" data-toggle="tab">Curl</a></li>
+                            <li role="presentation"><a href="#request-fetch-telemetry-example-http" data-toggle="tab">HTTP</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="request-fetch-telemetry-example-curl">
+                                <pre><code class="hljs curl">curl -X GET -H "Accept: application/json" "https://apihptu.e-yantra.org/api/telemetry?startTs=2020-12-06 19:00:00&endTs=2020-12-06 19:30:00"</code></pre>
+                            </div>
+                            <div class="tab-pane" id="request-fetch-telemetry-example-http">
+                                <pre><code class="hljs http">GET /api/telemetry?startTs=2020-12-06 19:00:00&endTs=2020-12-06 19:30:00 HTTP/1.1
+Host: apihptu.e-yantra.org
+Accept: application/json</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            
+                            <li role="presentation" class="active">
+                                <a href="#request-fetch-telemetry-responses-f4bb8893-9541-4597-8d68-a05de50983ce" data-toggle="tab">
+                                    
+                                    Successful
+                                    
+                                </a>
+                            </li>
+                            
+                            <li role="presentation">
+                                <a href="#request-fetch-telemetry-responses-516f39b6-90ea-4237-95b8-ab260764964c" data-toggle="tab">
+                                    
+                                    No data in time range
+                                    
+                                </a>
+                            </li>
+                            
+                        </ul>
+                        <div class="tab-content">
+                            
+                            <div class="tab-pane active" id="request-fetch-telemetry-responses-f4bb8893-9541-4597-8d68-a05de50983ce">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Sun, 06 Dec 2020 13:55:11 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Authorization,Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>58</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>302</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                    
+                                    <tr><td class="response-text-sample" colspan="2">
+                                        <pre><code>[
+    {
+        "id": 12,
+        "data": {
+            "temperature": 18,
+            "moisture": 70
+        },
+        "createdAt": "2020-12-06 19:15:10",
+        "updatedAt": "2020-12-06 19:15:10"
+    },
+    {
+        "id": 13,
+        "data": {
+            "temperature": 17.86,
+            "moisture": 70.25,
+            "atmosphericTemperature": 25.43,
+            "atmosphericMoisture": 54.97
+        },
+        "createdAt": "2020-12-06 19:16:55",
+        "updatedAt": "2020-12-06 19:22:05"
+    }
+]</code></pre>
+                                    </td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                            <div class="tab-pane" id="request-fetch-telemetry-responses-516f39b6-90ea-4237-95b8-ab260764964c">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>404 Not Found</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Fri, 11 Dec 2020 08:46:29 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Authorization,Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>58</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>2</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                    
+                                    <tr><td class="response-text-sample" colspan="2">
+                                        <pre><code>[]</code></pre>
+                                    </td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+
+                    <hr>
+                </div>
+                
+                
+                <div class="request">
+
+                    <h3 id="request-rpc-send-command">
+                        RPC Send Command
+                        <a href="#request-rpc-send-command"><i class="glyphicon glyphicon-link"></i></a>
+                    </h3>
+
+                    <div><p>Send RPC command to thing with id = <code>:id</code>. A command includes a method and which is a string and params which is a valid JSON.</p>
+</div>
+
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active"><a href="#request-rpc-send-command-example-curl" data-toggle="tab">Curl</a></li>
+                            <li role="presentation"><a href="#request-rpc-send-command-example-http" data-toggle="tab">HTTP</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="request-rpc-send-command-example-curl">
+                                <pre><code class="hljs curl">curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" -d '{
+    "method": "setAC",
+    "params": false
+}' "https://apihptu.e-yantra.org/api/rpc/:thingId"</code></pre>
+                            </div>
+                            <div class="tab-pane" id="request-rpc-send-command-example-http">
+                                <pre><code class="hljs http">POST /api/rpc/:thingId HTTP/1.1
+Host: apihptu.e-yantra.org
+Accept: application/json
+Content-Type: application/json
+
+{
+    "method": "setAC",
+    "params": false
+}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            
+                            <li role="presentation" class="active">
+                                <a href="#request-rpc-send-command-responses-94c15245-e4ea-418e-8857-4c1360486fa6" data-toggle="tab">
+                                    
+                                    RPC Send Command - 1
+                                    
+                                </a>
+                            </li>
+                            
+                            <li role="presentation">
+                                <a href="#request-rpc-send-command-responses-cad2d357-d6a2-4c89-ac67-7e69b6c72ba3" data-toggle="tab">
+                                    
+                                    RPC Send Command - 2
+                                    
+                                </a>
+                            </li>
+                            
+                            <li role="presentation">
+                                <a href="#request-rpc-send-command-responses-ad276a4a-b6ac-422c-98e9-1ab9bd7f64bf" data-toggle="tab">
+                                    
+                                    Required fields not present
+                                    
+                                </a>
+                            </li>
+                            
+                            <li role="presentation">
+                                <a href="#request-rpc-send-command-responses-8422d566-7892-4e9c-a5a9-3c91840bc8ff" data-toggle="tab">
+                                    
+                                    RPC Send Command - 3
+                                    
+                                </a>
+                            </li>
+                            
+                        </ul>
+                        <div class="tab-content">
+                            
+                            <div class="tab-pane active" id="request-rpc-send-command-responses-94c15245-e4ea-418e-8857-4c1360486fa6">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Sun, 06 Dec 2020 13:58:35 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Authorization,Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>59</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>126</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                    
+                                    <tr><td class="response-text-sample" colspan="2">
+                                        <pre><code>{
+    "requestId": 1,
+    "request": {
+        "method": "setAC",
+        "params": true
+    },
+    "createdAt": "2020-12-06 19:28:35",
+    "updatedAt": "2020-12-06 19:28:35"
+}</code></pre>
+                                    </td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                            <div class="tab-pane" id="request-rpc-send-command-responses-cad2d357-d6a2-4c89-ac67-7e69b6c72ba3">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Sun, 06 Dec 2020 13:58:58 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Authorization,Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>58</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>127</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                    
+                                    <tr><td class="response-text-sample" colspan="2">
+                                        <pre><code>{
+    "requestId": 2,
+    "request": {
+        "method": "setAC",
+        "params": false
+    },
+    "createdAt": "2020-12-06 19:28:58",
+    "updatedAt": "2020-12-06 19:28:58"
+}</code></pre>
+                                    </td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                            <div class="tab-pane" id="request-rpc-send-command-responses-ad276a4a-b6ac-422c-98e9-1ab9bd7f64bf">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>422 Unprocessable Entity</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Fri, 11 Dec 2020 07:46:23 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Authorization,Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>58</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>95</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                    
+                                    <tr><td class="response-text-sample" colspan="2">
+                                        <pre><code>{
+    "message": "The given data was invalid.",
+    "errors": {
+        "method": [
+            "The method field is required."
+        ]
+    }
+}</code></pre>
+                                    </td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                            <div class="tab-pane" id="request-rpc-send-command-responses-8422d566-7892-4e9c-a5a9-3c91840bc8ff">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Sun, 06 Dec 2020 13:59:34 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Authorization,Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>57</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>135</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                    
+                                    <tr><td class="response-text-sample" colspan="2">
+                                        <pre><code>{
+    "requestId": 3,
+    "request": {
+        "method": "setFan",
+        "params": {
+            "speed": 15
+        }
+    },
+    "createdAt": "2020-12-06 19:29:34",
+    "updatedAt": "2020-12-06 19:29:34"
+}</code></pre>
+                                    </td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+
+                    <hr>
+                </div>
+                
+                
+                <div class="request">
+
+                    <h3 id="request-rpc-receive">
+                        RPC Receive
+                        <a href="#request-rpc-receive"><i class="glyphicon glyphicon-link"></i></a>
+                    </h3>
+
+                    <div><p>Receive RPC command on the internet connected thing, sent by the RPC Send Command.</p>
+</div>
+
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active"><a href="#request-rpc-receive-example-curl" data-toggle="tab">Curl</a></li>
+                            <li role="presentation"><a href="#request-rpc-receive-example-http" data-toggle="tab">HTTP</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="request-rpc-receive-example-curl">
+                                <pre><code class="hljs curl">curl -X GET -H "Accept: application/json" "https://apihptu.e-yantra.org/api/rpc"</code></pre>
+                            </div>
+                            <div class="tab-pane" id="request-rpc-receive-example-http">
+                                <pre><code class="hljs http">GET /api/rpc HTTP/1.1
+Host: apihptu.e-yantra.org
+Accept: application/json</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div>
+                        <ul class="nav nav-tabs" role="tablist">
+                            
+                            <li role="presentation" class="active">
+                                <a href="#request-rpc-receive-responses-55162886-2116-4982-bd36-f7c458694cc6" data-toggle="tab">
+                                    
+                                    Response
+                                    
+                                </a>
+                            </li>
+                            
+                        </ul>
+                        <div class="tab-content">
+                            
+                            <div class="tab-pane active" id="request-rpc-receive-responses-55162886-2116-4982-bd36-f7c458694cc6">
+                                <table class="table table-bordered">
+                                    <tr><th style="width: 20%;">Status</th><td>200 OK</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Date</th><td>Sun, 06 Dec 2020 14:00:27 GMT</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Server</th><td>Apache/2.4.41 (Ubuntu)</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Vary</th><td>Authorization,Origin</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Cache-Control</th><td>no-cache, private</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Limit</th><td>60</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">X-RateLimit-Remaining</th><td>59</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Origin</th><td>*</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Credentials</th><td>true</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Access-Control-Allow-Methods</th><td>GET, POST, OPTIONS</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Length</th><td>135</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Keep-Alive</th><td>timeout=5, max=100</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Connection</th><td>Keep-Alive</td></tr>
+                                    
+                                    <tr><th style="width: 20%;">Content-Type</th><td>application/json</td></tr>
+                                    
+                                    
+                                    
+                                    <tr><td class="response-text-sample" colspan="2">
+                                        <pre><code>{
+    "requestId": 3,
+    "request": {
+        "method": "setFan",
+        "params": {
+            "speed": 15
+        }
+    },
+    "createdAt": "2020-12-06 19:29:34",
+    "updatedAt": "2020-12-06 19:30:27"
+}</code></pre>
+                                    </td></tr>
+                                    
+                                    
+                                </table>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+
+                    <hr>
+                </div>
+                
+
+
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-2.2.2.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $("table:not(.table)").addClass('table table-bordered');
+    });
+</script>
+</body>
+</html>
